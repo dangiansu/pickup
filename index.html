@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Payment Method</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f7f7f7;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .form-container {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        max-width: 100%;
+      }
+
+      .form-container h2 {
+        text-align: center;
+        color: #333;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #333;
+        margin-bottom: 8px;
+      }
+
+      .StripeElement {
+        width: 100%;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        background-color: white;
+      }
+
+      .button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        width: 100%;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .button:hover {
+        background-color: #0056b3;
+      }
+
+      .error-message {
+        color: red;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Create Payment Method</h2>
+      <form id="payment-form">
+        <div class="form-group">
+          <label for="card-element">Card Details</label>
+          <div id="card-element"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="name-on-card">Name on Card</label>
+          <input
+            type="text"
+            id="name-on-card"
+            placeholder="John Doe"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country / Region</label>
+          <input
+            type="text"
+            id="country"
+            placeholder="United States"
+            required
+          />
+        </div>
+
+        <button class="button" type="submit">Submit Payment Method</button>
+      </form>
+
+      <div class="error-message" id="error-message"></div>
+    </div>
+
+    <script>
+      const stripe = Stripe(
+        'pk_test_51PnJUWL4uvRefDuQOzYBdudAEVjxOvBRCAvtzdmLNdmftU1HzDku9JMooYov8PPJoBxHpl3JWiMNVRWTimDOxV6000ju45xGJo'
+      );
+      const elements = stripe.elements();
+
+      const cardElement = elements.create('card');
+      cardElement.mount('#card-element');
+
+      const form = document.getElementById('payment-form');
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const nameOnCard = document.getElementById('name-on-card').value;
+        const country = document.getElementById('country').value;
+
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+          type: 'card',
+          card: cardElement,
+          billing_details: {
+            name: nameOnCard,
+            address: {
+              country: country,
+            },
+          },
+        });
+
+        if (error) {
+          document.getElementById('error-message').textContent = error.message;
+        } else {
+          console.log('Payment Method ID:', paymentMethod.id);
+          alert('Payment method created successfully! ID: ' + paymentMethod.id);
+        }
+      });
+    </script>
+  </body>
+</html>
